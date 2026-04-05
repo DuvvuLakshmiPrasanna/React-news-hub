@@ -96,6 +96,19 @@ docker-compose ps
 docker-compose down
 ```
 
+## Verification
+
+Run the available automated checks:
+
+```bash
+npm run lint
+npm run build
+npm run verify:build
+npm run test:e2e
+```
+
+The Playwright suite mocks Hacker News responses so the hero-image and virtualization checks are deterministic.
+
 ## Required Artifacts Included
 
 - [docker-compose.yml](docker-compose.yml)
