@@ -7,12 +7,23 @@
 .hero-image {
   display: block;
   width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  object-fit: cover;
   margin-bottom: 1rem;
 }
 
-.header h1 {
+.eyebrow {
   margin: 0;
-  font-size: 2rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0f766e;
+}
+
+.header h1 {
+  margin: 0.35rem 0;
+  font-size: clamp(2rem, 3vw, 3rem);
 }
 
 .header p {
@@ -21,23 +32,36 @@
 
 .controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
 .search-input {
   flex: 1;
+  min-width: 220px;
   padding: 0.65rem 0.75rem;
   border-radius: 0.5rem;
   border: 1px solid #d1d5db;
 }
 
-.sort-button {
+.sort-button,
+.insights-button {
+  cursor: pointer;
   padding: 0.65rem 0.9rem;
+  border-radius: 0.5rem;
+}
+
+.sort-button {
   border: 1px solid #111827;
   background: #111827;
   color: #fff;
-  border-radius: 0.5rem;
+}
+
+.insights-button {
+  border: 1px solid #0f766e;
+  background: #fff;
+  color: #0f766e;
 }
 
 .status {
@@ -48,15 +72,36 @@
   color: #991b1b;
 }
 
-.article-list {
-  list-style: none;
-  padding: 0;
+.insights-panel {
+  border: 1px solid #99f6e4;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.insights-panel h3 {
+  margin: 0 0 0.55rem;
+}
+
+.insights-panel ul {
   margin: 0;
+  padding-left: 1.1rem;
+}
+
+.virtual-list {
+  height: 70vh;
+  min-height: 480px;
+  overflow: auto;
+  border: 1px solid #dbe2e8;
+  border-radius: 0.75rem;
+  background: #fff;
 }
 
 .article-item {
   border-bottom: 1px solid #e5e7eb;
-  padding: 0.85rem 0;
+  padding: 0.85rem;
+  background: #fff;
 }
 
 .article-title {
