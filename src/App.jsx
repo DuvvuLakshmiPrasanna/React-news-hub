@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import debounce from "lodash/debounce";
 import sortBy from "lodash/sortBy";
 import "./App.css";
-import { fetchTopStories } from "./api/newsApi";
+import { fetchTopStoriesProgressive } from "./api/newsApi";
 import ArticleListVirtualized from "./components/ArticleListVirtualized";
 
 const PerformanceInsights = lazy(
@@ -27,21 +27,40 @@ function App() {
   }, [queryInput]);
 
   useEffect(() => {
+    let isActive = true;
+
     const loadStories = async () => {
       setLoading(true);
       setError("");
+      setStories([]);
 
       try {
-        const results = await fetchTopStories(500);
-        setStories(results);
+        await fetchTopStoriesProgressive(500, {
+          batchSize: 40,
+          onBatch: (batch) => {
+            if (!isActive || batch.length === 0) {
+              return;
+            }
+
+            setStories((previousStories) => [...previousStories, ...batch]);
+          },
+        });
       } catch {
-        setError("Failed to load stories.");
+        if (isActive) {
+          setError("Failed to load stories.");
+        }
       } finally {
-        setLoading(false);
+        if (isActive) {
+          setLoading(false);
+        }
       }
     };
 
     loadStories();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   const filteredStories = useMemo(() => {
@@ -181,8 +200,13 @@ function App() {
         </div>
       </section>
 
-      {loading ? (
-        <p className="status status-loading">Loading stories in parallel...</p>
+      {loading && stories.length === 0 ? (
+        <p className="status status-loading">Loading stories...</p>
+      ) : null}
+      {loading && stories.length > 0 ? (
+        <p className="status status-loading status-soft-loading">
+          Loaded {stories.length} stories. Fetching more in the background...
+        </p>
       ) : null}
       {error ? <p className="status status-error">{error}</p> : null}
 
@@ -192,7 +216,7 @@ function App() {
         </Suspense>
       ) : null}
 
-      {loading || error ? null : (
+      {error || stories.length === 0 ? null : (
         <ArticleListVirtualized stories={filteredStories} />
       )}
     </main>

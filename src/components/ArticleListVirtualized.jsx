@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import ArticleItem from "./ArticleItem";
 
-const ESTIMATED_ROW_SIZE = 120;
+const ESTIMATED_ROW_SIZE = 170;
 
 export default function ArticleListVirtualized({ stories }) {
   const parentRef = useRef(null);
@@ -12,6 +12,7 @@ export default function ArticleListVirtualized({ stories }) {
     count: stories.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ESTIMATED_ROW_SIZE,
+    measureElement: (element) => element.getBoundingClientRect().height,
     overscan: 6,
   });
 
@@ -41,9 +42,10 @@ export default function ArticleListVirtualized({ stories }) {
             const story = stories[virtualItem.index];
 
             return (
-              <ArticleItem
+              <div
                 key={story.id}
-                story={story}
+                data-index={virtualItem.index}
+                ref={virtualizer.measureElement}
                 style={{
                   left: 0,
                   position: "absolute",
@@ -51,7 +53,9 @@ export default function ArticleListVirtualized({ stories }) {
                   transform: `translateY(${virtualItem.start}px)`,
                   width: "100%",
                 }}
-              />
+              >
+                <ArticleItem story={story} />
+              </div>
             );
           })}
         </div>
