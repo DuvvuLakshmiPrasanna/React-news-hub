@@ -49,6 +49,7 @@ test('article list is virtualized and interactive', async ({ page }) => {
   await mockHackerNews(page)
   await page.goto('/')
   await waitForStories(page)
+  await expect(page.locator('.metric-card').first().locator('strong')).toHaveText('500')
 
   const list = page.getByTestId('article-list')
   const items = list.getByTestId('article-item')

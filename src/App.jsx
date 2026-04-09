@@ -74,6 +74,12 @@ function App() {
     );
   }, [stories, query]);
 
+  const hasActiveQuery = query.trim().length > 0;
+  const showSearchingForQuery =
+    hasActiveQuery && filteredStories.length === 0 && loading;
+  const showNoResults =
+    hasActiveQuery && filteredStories.length === 0 && !loading && !error;
+
   const metrics = useMemo(() => {
     const storyCount = stories.length;
     const filteredCount = filteredStories.length;
@@ -208,7 +214,18 @@ function App() {
           Loaded {stories.length} stories. Fetching more in the background...
         </p>
       ) : null}
+      {showSearchingForQuery ? (
+        <p className="status status-loading status-soft-loading">
+          Looking for "{query}" in incoming stories...
+        </p>
+      ) : null}
       {error ? <p className="status status-error">{error}</p> : null}
+
+      {showNoResults ? (
+        <p className="status status-empty">
+          No stories found for "{query}". Try a broader keyword.
+        </p>
+      ) : null}
 
       {showInsights ? (
         <Suspense fallback={<p className="status">Loading insights...</p>}>
@@ -216,7 +233,9 @@ function App() {
         </Suspense>
       ) : null}
 
-      {error || stories.length === 0 ? null : (
+      {error ||
+      stories.length === 0 ||
+      (hasActiveQuery && filteredStories.length === 0) ? null : (
         <ArticleListVirtualized stories={filteredStories} />
       )}
     </main>

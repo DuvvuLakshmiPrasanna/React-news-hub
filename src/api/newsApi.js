@@ -11,17 +11,9 @@ async function fetchStoryById(id) {
   return item?.type === 'story' ? item : null
 }
 
-function splitIntoBatches(items, batchSize) {
-  const batches = []
-  for (let index = 0; index < items.length; index += batchSize) {
-    batches.push(items.slice(index, index + batchSize))
-  }
-  return batches
-}
-
 export async function fetchTopStoriesProgressive(
   limit = 500,
-  { batchSize = 40, onBatch } = {},
+  { flushIntervalMs = 80, onBatch } = {},
 ) {
   const response = await fetch(TOP_STORIES_URL)
   if (!response.ok) {
@@ -31,18 +23,47 @@ export async function fetchTopStoriesProgressive(
   const ids = await response.json()
   const selected = ids.slice(0, limit)
   const stories = []
+  const pendingBatch = []
 
-  const batches = splitIntoBatches(selected, Math.max(1, batchSize))
-
-  for (const batch of batches) {
-    const resolvedBatch = await Promise.all(batch.map((id) => fetchStoryById(id)))
-    const validStories = resolvedBatch.filter(Boolean)
-    stories.push(...validStories)
-
-    if (onBatch) {
-      onBatch(validStories)
+  const flushPending = () => {
+    if (!onBatch || pendingBatch.length === 0) {
+      return
     }
+
+    onBatch(pendingBatch.splice(0, pendingBatch.length))
   }
+
+  let flushTimer = null
+  const scheduleFlush = () => {
+    if (!onBatch || flushTimer) {
+      return
+    }
+
+    flushTimer = setTimeout(() => {
+      flushTimer = null
+      flushPending()
+    }, flushIntervalMs)
+  }
+
+  await Promise.all(
+    selected.map(async (id) => {
+      const story = await fetchStoryById(id)
+      if (!story) {
+        return
+      }
+
+      stories.push(story)
+      if (onBatch) {
+        pendingBatch.push(story)
+        scheduleFlush()
+      }
+    }),
+  )
+
+  if (flushTimer) {
+    clearTimeout(flushTimer)
+  }
+  flushPending()
 
   return stories
 }

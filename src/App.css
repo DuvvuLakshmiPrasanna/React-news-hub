@@ -282,6 +282,12 @@
   border: 1px solid rgba(239, 68, 68, 0.16);
 }
 
+.status-empty {
+  background: rgba(248, 250, 252, 0.94);
+  color: #334155;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
 .insights-panel {
   margin-top: 18px;
   margin-bottom: 18px;
