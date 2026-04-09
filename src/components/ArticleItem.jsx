@@ -3,6 +3,9 @@ import { formatUnixTime } from "../utils/dateFormatter";
 
 function ArticleItem({ story, style }) {
   const score = story.score || 0;
+  const articleHref = story?.url
+    ? story.url
+    : `https://news.ycombinator.com/item?id=${story?.id || ""}`;
 
   return (
     <article className="article-item" data-testid="article-item" style={style}>
@@ -16,8 +19,9 @@ function ArticleItem({ story, style }) {
       </div>
 
       <a
+        aria-label={`Open article: ${story.title || "Untitled story"}`}
         className="article-link"
-        href={story.url || "#"}
+        href={articleHref}
         rel="noreferrer"
         target="_blank"
       >
