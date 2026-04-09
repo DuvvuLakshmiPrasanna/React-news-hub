@@ -24,10 +24,10 @@ async function mockHackerNews(page) {
         id,
         title: `Story ${id}`,
         by: `author-${id}`,
-        score: 500 - id,
+        score: id,
         time: 1710000000 + id,
         type: 'story',
-        url: `https://example.com/story-${id}`,
+        url: id % 10 === 0 ? null : `https://example.com/story-${id}`,
       }),
     })
   })
@@ -57,6 +57,16 @@ test('article list is virtualized and interactive', async ({ page }) => {
   expect(count).toBeLessThan(50)
 
   await page.getByRole('button', { name: /sort by score/i }).click()
-  await page.getByPlaceholder('Filter by title').fill('the')
+  await expect(items.first().locator('.article-score')).toContainText('500')
+
+  await page.getByPlaceholder('Filter by title').fill('Story 42')
+  await expect(items.first().locator('.article-title')).toContainText('Story 42')
+
+  await page.getByPlaceholder('Filter by title').fill('Story 500')
+  await expect(items.first().locator('.article-link')).toHaveAttribute(
+    'href',
+    'https://news.ycombinator.com/item?id=500',
+  )
+
   await expect(list).toBeVisible()
 })
