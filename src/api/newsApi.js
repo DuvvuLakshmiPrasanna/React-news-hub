@@ -1,14 +1,30 @@
 const TOP_STORIES_URL = 'https://hacker-news.firebaseio.com/v0/topstories.json'
 const STORY_URL = 'https://hacker-news.firebaseio.com/v0/item'
 
-async function fetchStoryById(id) {
-  const itemResponse = await fetch(`${STORY_URL}/${id}.json`)
-  if (!itemResponse.ok) {
-    return null
+function createFallbackStory(id) {
+  return {
+    id,
+    title: `Story ${id}`,
+    by: 'unknown',
+    score: 0,
+    time: 0,
+    type: 'story',
+    url: `https://news.ycombinator.com/item?id=${id}`,
   }
+}
 
-  const item = await itemResponse.json()
-  return item?.type === 'story' ? item : null
+async function fetchStoryById(id) {
+  try {
+    const itemResponse = await fetch(`${STORY_URL}/${id}.json`)
+    if (!itemResponse.ok) {
+      return createFallbackStory(id)
+    }
+
+    const item = await itemResponse.json()
+    return item?.type === 'story' ? item : createFallbackStory(id)
+  } catch {
+    return createFallbackStory(id)
+  }
 }
 
 export async function fetchTopStoriesProgressive(
@@ -21,7 +37,7 @@ export async function fetchTopStoriesProgressive(
   }
 
   const ids = await response.json()
-  const selected = ids
+  const selected = ids.slice(0, limit)
   const stories = []
   const pendingBatch = []
   const resolvedStories = new Array(selected.length)
@@ -29,7 +45,6 @@ export async function fetchTopStoriesProgressive(
 
   const maxConcurrent = Math.max(1, Math.min(concurrency, selected.length))
   let cursor = 0
-  let collectedCount = 0
   let nextFlushIndex = 0
 
   const flushPending = () => {
@@ -67,7 +82,7 @@ export async function fetchTopStoriesProgressive(
   }
 
   const nextIndex = () => {
-    if (collectedCount >= limit) {
+    if (cursor >= selected.length) {
       return null
     }
 
@@ -91,13 +106,9 @@ export async function fetchTopStoriesProgressive(
       resolvedFlags[currentIndex] = true
       resolvedStories[currentIndex] = story
 
-      if (story) {
-        collectedCount += 1
-      }
-
       flushReadyStories()
 
-      if (collectedCount >= limit) {
+      if (stories.length >= limit) {
         return
       }
     }
