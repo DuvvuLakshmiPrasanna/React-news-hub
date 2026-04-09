@@ -92,18 +92,21 @@ docker compose down
 
 ## GitHub Pages Deployment Ready
 
-This repository includes a deployment workflow:
+This repository is set up for the gh-pages branch deployment flow:
 
-1. [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml)
+1. `npm run build` creates the production `dist` folder.
+2. `npm run deploy` publishes only `dist` to the `gh-pages` branch.
+3. GitHub Pages should be configured to serve from the `gh-pages` branch and `/ (root)`.
 
-Vite base path auto-adjusts for project pages in [vite.config.js](vite.config.js) using the GitHub Actions repository context.
+Vite base path is already configured in [vite.config.js](vite.config.js) for the project page path.
 
 ### One-time GitHub setup
 
 1. Push main to GitHub.
 2. In repository settings, open Pages.
-3. Set Source to GitHub Actions.
-4. Push to main (or run the workflow manually) to publish.
+3. Set Source to Deploy from a branch.
+4. Select branch `gh-pages` and folder `/ (root)`.
+5. Run `npm run deploy` whenever you want to publish a new build.
 
 ## Verification Commands
 
