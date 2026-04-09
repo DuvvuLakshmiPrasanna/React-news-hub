@@ -1,104 +1,110 @@
-# React News Hub - Performance Engineering Project
+# React News Hub
 
-A Hacker News aggregator built to demonstrate practical frontend performance engineering.
+High-performance Hacker News aggregator built in React and Vite, designed to demonstrate measurable optimization against Core Web Vitals and modern frontend bottlenecks.
 
-This repository contains:
+## Project Goals
 
-- An intentionally slow baseline implementation on branch slow-version.
-- A fully optimized implementation on main.
+1. Build an intentionally slow baseline implementation and preserve it on slow-version.
+2. Ship an optimized version on main with proven improvements.
+3. Document all performance findings in [PERFORMANCE.md](PERFORMANCE.md).
+4. Deliver production-ready containerization and GitHub Pages deployment support.
 
-## Features
+## Implemented Features
 
-- Fetch and display top 500 Hacker News stories.
-- Filter stories by title.
-- Sort stories by score.
-- Optimized hero image with responsive attributes.
-- Virtualized story list for low DOM overhead.
-- Lazy-loaded optimization insights panel (code splitting).
-- Bundle analysis report generation (stats.html).
+1. Fetch top 500 Hacker News stories and render title, author, score, timestamp, and outbound link.
+2. Filter by title in near real-time.
+3. Sort by score descending.
+4. Virtualized article list for low DOM count and smooth interactions.
+5. Responsive, optimized hero image with LCP/CLS-safe attributes.
+6. Code splitting via lazy-loaded non-critical UI module.
+7. Bundle analysis output through stats.html.
 
-## Tech Stack
+## Architecture Highlights
 
-- React + Vite
-- @tanstack/react-virtual
-- Lodash (cherry-picked module imports)
-- Docker + Docker Compose
-- Nginx (production static serving)
+1. Parallel network fetching with Promise.all in [src/api/newsApi.js](src/api/newsApi.js).
+2. Virtualized rendering in [src/components/ArticleListVirtualized.jsx](src/components/ArticleListVirtualized.jsx).
+3. Memoized row component and shared date formatter:
+   [src/components/ArticleItem.jsx](src/components/ArticleItem.jsx)
+   [src/utils/dateFormatter.js](src/utils/dateFormatter.js)
+4. Cherry-picked lodash modules in [src/App.jsx](src/App.jsx).
+5. Build chunk visualization in [vite.config.js](vite.config.js).
 
-## Branches
+## Functional Proof (Automated)
 
-- main: optimized final implementation
-- slow-version: unoptimized baseline with deliberate anti-patterns
+Playwright tests in [tests/news-hub.spec.js](tests/news-hub.spec.js) verify:
 
-## Local Development
+1. Hero image includes width, height, srcset, and sizes.
+2. Article list is virtualized with visible nodes kept below threshold.
+3. Sorting and filtering interactions work.
+4. Article links are always openable, including fallback to Hacker News item page when a direct URL is missing.
 
-1. Install dependencies:
+Run:
+
+```bash
+npm run test:e2e
+```
+
+## Branch Strategy
+
+1. main: final optimized build.
+2. slow-version: intentionally unoptimized baseline with anti-patterns.
+
+## Local Setup
 
 ```bash
 npm install
-```
-
-2. Start development server:
-
-```bash
 npm run dev
 ```
 
-3. Build production bundle:
+Build and preview production output:
 
 ```bash
 npm run build
-```
-
-4. Preview production build:
-
-```bash
 npm run preview
 ```
 
-## Run Slow Version Locally
-
-```bash
-git checkout slow-version
-npm install
-npm run dev
-```
-
-Switch back to optimized build:
-
-```bash
-git checkout main
-```
-
-## Docker
+## Docker (Production Serving)
 
 Environment variables are documented in [.env.example](.env.example).
 
-1. Start containerized app:
+Start:
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
-2. Open in browser:
-
-- http://localhost:3000
-
-3. Check container health:
+Check status and health:
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
-4. Stop services:
+Open app:
+
+1. http://localhost:3000
+
+Stop:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
-## Verification
+## GitHub Pages Deployment Ready
 
-Run the available automated checks:
+This repository includes a deployment workflow:
+
+1. [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml)
+
+Vite base path auto-adjusts for project pages in [vite.config.js](vite.config.js) using the GitHub Actions repository context.
+
+### One-time GitHub setup
+
+1. Push main to GitHub.
+2. In repository settings, open Pages.
+3. Set Source to GitHub Actions.
+4. Push to main (or run the workflow manually) to publish.
+
+## Verification Commands
 
 ```bash
 npm run lint
@@ -107,33 +113,13 @@ npm run verify:build
 npm run test:e2e
 ```
 
-The Playwright suite mocks Hacker News responses so the hero-image and virtualization checks are deterministic.
+## Submission Checklist
 
-## Required Artifacts Included
-
-- [docker-compose.yml](docker-compose.yml)
-- [Dockerfile](Dockerfile)
-- [.env.example](.env.example)
-- [PERFORMANCE.md](PERFORMANCE.md)
-- [stats.html](stats.html) generated after running npm run build
-
-## How Requirements Are Addressed
-
-- Network optimization:
-  - Parallel fetching with Promise.all in [src/api/newsApi.js](src/api/newsApi.js).
-- List performance:
-  - Virtualization in [src/components/ArticleListVirtualized.jsx](src/components/ArticleListVirtualized.jsx).
-- Dependency optimization:
-  - Cherry-picked lodash imports in [src/App.jsx](src/App.jsx).
-- Expensive computation optimization:
-  - Reused date formatter in [src/utils/dateFormatter.js](src/utils/dateFormatter.js).
-- Code splitting:
-  - React.lazy + Suspense in [src/App.jsx](src/App.jsx) for [src/components/PerformanceInsights.jsx](src/components/PerformanceInsights.jsx).
-- Hero image optimization:
-  - width, height, srcset, sizes, and data-testid attributes in [src/App.jsx](src/App.jsx).
-
-## Notes for Evaluation
-
-- Build artifacts are generated via npm run build in dist/assets.
-- Multiple JavaScript files are produced because of lazy-loaded chunking.
-- The app container includes health checks in both Dockerfile and docker-compose.
+1. [docker-compose.yml](docker-compose.yml) and [Dockerfile](Dockerfile) exist with healthchecks.
+2. [PERFORMANCE.md](PERFORMANCE.md) includes baseline table and optimization log.
+3. [.env.example](.env.example) exists and documents runtime variables.
+4. slow-version branch exists.
+5. Hero image optimization attributes exist in [src/App.jsx](src/App.jsx).
+6. Virtualized list contracts exist in [src/components/ArticleListVirtualized.jsx](src/components/ArticleListVirtualized.jsx).
+7. Multiple JS chunks and stats.html are generated during build.
+8. Full lodash bundle is avoided through module-level imports.
