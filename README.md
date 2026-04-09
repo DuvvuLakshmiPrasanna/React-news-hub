@@ -82,6 +82,7 @@ docker compose ps
 Open app:
 
 1. http://localhost:3000
+2. If you override PORT locally, use that mapped port instead, for example http://localhost:3001
 
 Stop:
 
