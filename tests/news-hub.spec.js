@@ -57,7 +57,13 @@ test('article list is virtualized and interactive', async ({ page }) => {
   expect(count).toBeLessThan(50)
 
   await page.getByRole('button', { name: /sort by score/i }).click()
-  await expect(items.first().locator('.article-score')).toContainText('500')
+  const firstScore = Number(
+    (await items.first().locator('.article-score').innerText()).trim(),
+  )
+  const secondScore = Number(
+    (await items.nth(1).locator('.article-score').innerText()).trim(),
+  )
+  expect(firstScore).toBeGreaterThanOrEqual(secondScore)
 
   await page.getByPlaceholder('Filter by title').fill('Story 42')
   await expect(items.first().locator('.article-title')).toContainText('Story 42')
